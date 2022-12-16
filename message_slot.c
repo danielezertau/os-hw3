@@ -92,7 +92,7 @@ static ssize_t device_read(struct file* file,
     printk("After list traversal\n");
     // No channel for ID
     if (curr == NULL || curr->channel_id != channel_id) {
-        printk("curr is either NULL or has the wrong channel_id. Expected: $d, actual: $d\n", channel_id, curr->channel_id);
+        printk("curr is either NULL or has the wrong channel_id. Expected: %d, actual: %d\n", channel_id, curr->channel_id);
         return -EWOULDBLOCK;
     }
     printk("After channel id search\n");
