@@ -148,7 +148,7 @@ static ssize_t device_write(struct file* file,
         // Initialize linked list
         head = create_node(channel_id);
         if (head == NULL) {
-            return -EMVSERR;
+            return -ENOMEM;
         }
         message_slots[minor_number] = head;
         curr = head;
@@ -160,7 +160,7 @@ static ssize_t device_write(struct file* file,
         // Create new node
         curr = create_node(channel_id);
         if (curr == NULL) {
-            return -EMVSERR;
+            return -ENOMEM;
         }
     }
 
@@ -204,8 +204,7 @@ struct file_operations Fops = {
 
 //---------------------------------------------------------------
 // Initialize the module - Register the character device
-static int __init module_init(void)
-{
+static int __init module_init(void) {
     int rc = -1;
     // Register driver capabilities. Obtain major num
     rc = register_chrdev(MAJOR_NUM, DEVICE_NAME, &Fops);
@@ -221,8 +220,7 @@ static int __init module_init(void)
 }
 
 //---------------------------------------------------------------
-static void __exit module_cleanup(void)
-{
+static void __exit module_cleanup(void) {
     int i;
     // Free memory
     for (i = 0; i < MAX_MESSAGE_SLOTS; ++i) {
