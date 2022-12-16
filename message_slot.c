@@ -195,7 +195,7 @@ static long device_ioctl( struct   file* file,
 // This structure will hold the functions to be called
 // when a process does something to the device we created
 struct file_operations Fops = {
-        .owner	  = THIS_MODULE,
+        .owner	        = THIS_MODULE,
         .read           = device_read,
         .write          = device_write,
         .open           = device_open,
