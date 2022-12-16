@@ -8,11 +8,11 @@
 #define MODULE
 
 
-#include <linux/kernel.h>   /* We're doing kernel work */
-#include <linux/module.h>   /* Specifically, a module */
-#include <linux/fs.h>       /* for register_chrdev */
-#include <linux/uaccess.h>  /* for get_user and put_user */
-#include <linux/string.h>   /* for memset. NOTE - not string.h!*/
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/fs.h>
+#include <linux/uaccess.h>
+#include <linux/string.h>
 #include <linux/errno.h>
 #include <linux/stddef.h> /* for NULL */
 #include <linux/slab.h> /* for GFP_KERNEL */
@@ -61,10 +61,11 @@ static ssize_t device_read(struct file* file,
                             char __user* buffer,
                             size_t length,
                             loff_t* offset) {
-    int minor_number, channel_id, i = 0;
+    ssize_t i;
+    int minor_number, channel_id;
     struct LinkedList *head, *curr;
     // Channel ID not set
-    channel_id = (int) file->private_data == 0;
+    channel_id = (long) file->private_data == 0;
     if (channel_id) {
         return -EINVAL;
     }
@@ -122,7 +123,8 @@ static ssize_t device_write(struct file* file,
                             const char __user* buffer,
                             size_t length,
                             loff_t* offset) {
-    int minor_number, channel_id, i = 0;
+    ssize_t i;
+    int minor_number, channel_id = 0;
     struct LinkedList *head, *curr;
     // Channel not set
     channel_id = (int) file->private_data;
@@ -137,7 +139,6 @@ static ssize_t device_write(struct file* file,
     // Write message to the kernel buffer
     minor_number = get_minor_number(file);
 
-    ssize_t i;
     printk("Invoking device_write(%p,%ld)\n", file, length);
 
     head = message_slots[minor_number];
