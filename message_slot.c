@@ -69,7 +69,7 @@ static ssize_t device_read(struct file* file,
     int minor_number, channel_id;
     struct LinkedList *head, *curr;
     // Channel ID not set
-    channel_id = (long) file->private_data == 0;
+    channel_id = (unsigned long) file->private_data;
     if (channel_id) {
         return -EINVAL;
     }
@@ -92,7 +92,7 @@ static ssize_t device_read(struct file* file,
     printk("After list traversal\n");
     // No channel for ID
     if (curr == NULL || curr->channel_id != channel_id) {
-        printk("curr is either NULL or has the wrong channel_id\n");
+        printk("curr is either NULL or has the wrong channel_id. Expected: $d, actual: $d\n", channel_id, curr->channel_id);
         return -EWOULDBLOCK;
     }
     printk("After channel id search\n");
@@ -131,7 +131,7 @@ static ssize_t device_write(struct file* file,
     int minor_number, channel_id = 0;
     struct LinkedList *head, *curr;
     // Channel not set
-    channel_id = (long) file->private_data;
+    channel_id = (unsigned long) file->private_data;
     if (channel_id == 0) {
         return -EINVAL;
     }
@@ -190,6 +190,7 @@ static long device_ioctl( struct   file* file,
 
     printk("Setting channel ID to %ld\n", ioctl_param);
     file -> private_data = (void *) ioctl_param;
+    printk("Successfully set private data to %ld\n", ioctl_param);
 
     return SUCCESS;
 }
