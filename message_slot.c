@@ -77,7 +77,7 @@ static ssize_t device_read(struct file* file,
         return -EWOULDBLOCK;
     }
 
-    printk("Invoking device_read(%p,%ld)\n", file, length);
+    printk("Invoking device_read(%p,%d)\n", file, length);
     // Search for the message channel
     curr = head;
     while(head ->next != NULL && head->channel_id != channel_id) {
@@ -139,7 +139,7 @@ static ssize_t device_write(struct file* file,
     // Write message to the kernel buffer
     minor_number = get_minor_number(file);
 
-    printk("Invoking device_write(%p,%ld)\n", file, length);
+    printk("Invoking device_write(%p,%d)\n", file, length);
 
     head = message_slots[minor_number];
     curr = head;
@@ -184,7 +184,7 @@ static long device_ioctl( struct   file* file,
         return -EINVAL;
     }
 
-    printk("Setting channel ID to %ld\n", ioctl_param);
+    printk("Setting channel ID to %d\n", ioctl_param);
     file -> private_data = (void *) ioctl_param;
 
     return SUCCESS;
