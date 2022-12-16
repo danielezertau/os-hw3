@@ -127,7 +127,7 @@ static ssize_t device_write(struct file* file,
     int minor_number, channel_id = 0;
     struct LinkedList *head, *curr;
     // Channel not set
-    channel_id = (int) file->private_data;
+    channel_id = (long) file->private_data;
     if (channel_id == 0) {
         return -EINVAL;
     }
