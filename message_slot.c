@@ -128,13 +128,15 @@ static ssize_t device_write(struct file* file,
                             size_t length,
                             loff_t* offset) {
     ssize_t i;
-    int minor_number, channel_id = 0;
+    int minor_number, channel_id;
     struct LinkedList *head, *curr;
     // Channel not set
-    channel_id = (unsigned long) file->private_data;
-    if (channel_id == 0) {
+    if (file->private_data == NULL) {
         return -EINVAL;
     }
+
+    channel_id = (unsigned long) file->private_data;
+
     // Message too big or no message
     if (length == 0 || length > 128) {
         return -EMSGSIZE;
@@ -143,7 +145,7 @@ static ssize_t device_write(struct file* file,
     // Write message to the kernel buffer
     minor_number = get_minor_number(file);
 
-    printk("Invoking device_write(%p,%zu)\n", file, length);
+    printk("Invoking device_write\n");
 
     head = message_slots[minor_number];
     curr = head;
@@ -158,13 +160,15 @@ static ssize_t device_write(struct file* file,
         curr = head;
     } else {
         // Traverse linked list
-        while(curr->next != NULL) {
+        while(curr->next != NULL && curr->channel_id != channel_id) {
             curr = curr->next;
         }
-        // Create new node
-        curr = create_node(channel_id);
-        if (curr == NULL) {
-            return -ENOMEM;
+        if (curr->next == NULL) {
+            // Create new node
+            curr = create_node(channel_id);
+            if (curr == NULL) {
+                return -ENOMEM;
+            }
         }
     }
 
@@ -189,7 +193,7 @@ static long device_ioctl( struct   file* file,
     }
 
     printk("Setting channel ID to %ld\n", ioctl_param);
-    file -> private_data = (void *) ioctl_param;
+    file->private_data = (void *) ioctl_param;
     printk("Successfully set private data to %ld\n", ioctl_param);
 
     return SUCCESS;
