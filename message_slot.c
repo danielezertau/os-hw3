@@ -78,7 +78,6 @@ static ssize_t device_read(struct file* file,
     minor_number = get_minor_number(file);
     head = message_slots[minor_number];
     if (head == NULL) {
-        printk("Head is NULL\n");
         return -EWOULDBLOCK;
     }
 
@@ -86,16 +85,12 @@ static ssize_t device_read(struct file* file,
     // Search for the message channel
     curr = head;
     while(curr ->next != NULL && curr->channel_id != channel_id) {
-        printk("Searching for channel_id %d\n", channel_id);
         curr = curr->next;
     }
-    printk("After list traversal\n");
     // No channel for ID
     if (curr == NULL || curr->channel_id != channel_id) {
-        printk("curr is either NULL or has the wrong channel_id. Expected: %d, actual: %d\n", channel_id, curr->channel_id);
         return -EWOULDBLOCK;
     }
-    printk("After channel id search\n");
     // Buffer too small for message
     if (length < curr->message_size) {
         return -ENOSPC;
@@ -107,7 +102,7 @@ static ssize_t device_read(struct file* file,
             return -EFAULT;
         }
     }
-
+    printk("Successfully read %zu bytes\n", i);
     return i;
 }
 
@@ -179,6 +174,7 @@ static ssize_t device_write(struct file* file,
         }
     }
     curr->message_size = i;
+    printk("Successfully wrote %zu bytes\n", i);
     // return the number of input characters used
     return i;
 }
