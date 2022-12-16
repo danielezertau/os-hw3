@@ -204,7 +204,7 @@ struct file_operations Fops = {
 
 //---------------------------------------------------------------
 // Initialize the module - Register the character device
-static int __init module_init(void) {
+static int __init message_slot_init(void) {
     int rc = -1;
     // Register driver capabilities. Obtain major num
     rc = register_chrdev(MAJOR_NUM, DEVICE_NAME, &Fops);
@@ -220,7 +220,7 @@ static int __init module_init(void) {
 }
 
 //---------------------------------------------------------------
-static void __exit module_cleanup(void) {
+static void __exit message_slot_cleanup(void) {
     int i;
     // Free memory
     for (i = 0; i < MAX_MESSAGE_SLOTS; ++i) {
@@ -231,5 +231,5 @@ static void __exit module_cleanup(void) {
 }
 
 //---------------------------------------------------------------
-module_init(module_init);
-module_exit(module_cleanup);
+module_init(message_slot_init);
+module_exit(message_slot_cleanup);
