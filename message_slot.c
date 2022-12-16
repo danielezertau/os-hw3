@@ -163,7 +163,7 @@ static ssize_t device_write(struct file* file,
         while(curr->next != NULL && curr->channel_id != channel_id) {
             curr = curr->next;
         }
-        if (curr->next == NULL) {
+        if (curr->channel_id != channel_id) {
             // Create new node
             curr = create_node(channel_id);
             if (curr == NULL) {
