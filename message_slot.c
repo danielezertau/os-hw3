@@ -33,6 +33,10 @@ struct LinkedList {
     struct LinkedList *next;
 };
 
+int get_minor_number(struct file* file) {
+    return iminor(file->f_inode);
+}
+
 void free_linked_list(struct LinkedList* head) {
     struct LinkedList *curr, *tmp;
     if (head == NULL) {
@@ -110,10 +114,6 @@ struct LinkedList* create_node(int channel_id) {
         node->channel_id = channel_id;
     }
     return node;
-}
-
-int get_minor_number(struct file* file) {
-    return iminor(file->f_inode);
 }
 
 //---------------------------------------------------------------
