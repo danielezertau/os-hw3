@@ -69,10 +69,10 @@ static ssize_t device_read(struct file* file,
     int minor_number, channel_id;
     struct LinkedList *head, *curr;
     // Channel ID not set
-    channel_id = (unsigned long) file->private_data;
-    if (channel_id) {
+    if (file->private_data == NULL) {
         return -EINVAL;
     }
+    channel_id = (unsigned long) file->private_data;
 
     // Channel is empty
     minor_number = get_minor_number(file);
