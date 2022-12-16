@@ -84,7 +84,7 @@ static ssize_t device_read(struct file* file,
     printk("Invoking device_read(%p,%zu)\n", file, length);
     // Search for the message channel
     curr = head;
-    while(curr ->next != NULL && head->channel_id != channel_id) {
+    while(curr ->next != NULL && curr->channel_id != channel_id) {
         curr = curr->next;
     }
     // No channel for ID
