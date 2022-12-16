@@ -212,7 +212,7 @@ static int __init message_slot_init(void) {
     // Negative values signify an error
     if( rc < 0 ) {
         printk(KERN_ALERT "%s registration failed for %d\n",
-               DEVICE_FILE_NAME, MAJOR_NUM);
+               DEVICE_NAME, MAJOR_NUM);
         return rc;
     }
 
