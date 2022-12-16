@@ -8,16 +8,19 @@
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
-    int expected_num_args = 3;
+    int expected_num_args = 3, channel_id, fd;
+    char* message_slot_file_path;
+    char buff[MAX_MESSAGE_LEN];
+
     if (argc != expected_num_args) {
         printf("Wrong number of arguments. Expected: %d, actual: %d", expected_num_args, argc);
         exit(EXIT_FAILURE);
     }
 
-    char* message_slot_file_path = argv[1];
-    int channel_id = (int) strtol(argv[2], NULL, 10);
+    message_slot_file_path = argv[1];
+    channel_id = (int) strtol(argv[2], NULL, 10);
 
-    int fd = open(message_slot_file_path, O_RDWR);
+    fd = open(message_slot_file_path, O_RDWR);
     if (fd < 0) {
         perror(strerror(errno));
         exit(EXIT_FAILURE);
@@ -28,7 +31,6 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    char buff[MAX_MESSAGE_LEN];
     if (read(fd, buff, MAX_MESSAGE_LEN) == -1) {
         perror(strerror(errno));
         exit(EXIT_FAILURE);

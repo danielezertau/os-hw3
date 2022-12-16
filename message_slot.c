@@ -34,11 +34,11 @@ struct LinkedList {
 };
 
 void free_linked_list(struct LinkedList* head) {
+    struct LinkedList *curr, *tmp;
     if (head == NULL) {
         return;
     }
-    struct LinkedList* curr = head;
-    struct LinkedList* tmp;
+    curr = head;
     while (curr->next != NULL) {
         tmp = curr;
         curr = curr -> next;
@@ -61,22 +61,24 @@ static ssize_t device_read(struct file* file,
                             char __user* buffer,
                             size_t length,
                             loff_t* offset) {
+    int minor_number, channel_id, i = 0;
+    struct LinkedList *head, *curr;
     // Channel ID not set
-    int channel_id = (int) file->private_data == 0;
+    channel_id = (int) file->private_data == 0;
     if (channel_id) {
         return -EINVAL;
     }
 
     // Channel is empty
-    int minor_number = get_minor_number(file);
-    struct LinkedList* head = message_slots[minor_number];
+    minor_number = get_minor_number(file);
+    head = message_slots[minor_number];
     if (head == NULL) {
         return -EWOULDBLOCK;
     }
 
     printk("Invoking device_read(%p,%ld)\n", file, length);
     // Search for the message channel
-    struct LinkedList* curr = head;
+    curr = head;
     while(head ->next != NULL && head->channel_id != channel_id) {
         curr = curr->next;
     }
@@ -120,8 +122,10 @@ static ssize_t device_write(struct file* file,
                             const char __user* buffer,
                             size_t length,
                             loff_t* offset) {
+    int minor_number, channel_id, i = 0;
+    struct LinkedList *head, *curr;
     // Channel not set
-    int channel_id = (int) file->private_data;
+    channel_id = (int) file->private_data;
     if (channel_id == 0) {
         return -EINVAL;
     }
@@ -131,13 +135,13 @@ static ssize_t device_write(struct file* file,
     }
 
     // Write message to the kernel buffer
-    int minor_number = get_minor_number(file);
+    minor_number = get_minor_number(file);
 
     ssize_t i;
     printk("Invoking device_write(%p,%ld)\n", file, length);
 
-    struct LinkedList* head = message_slots[minor_number];
-    struct LinkedList* curr = head;
+    head = message_slots[minor_number];
+    curr = head;
 
     if (head == NULL) {
         // Initialize linked list
@@ -218,8 +222,9 @@ static int __init module_init(void)
 //---------------------------------------------------------------
 static void __exit module_cleanup(void)
 {
+    int i;
     // Free memory
-    for (int i = 0; i < MAX_MESSAGE_SLOTS; ++i) {
+    for (i = 0; i < MAX_MESSAGE_SLOTS; ++i) {
         free_linked_list(message_slots[i]);
     }
     // Unregister the device
