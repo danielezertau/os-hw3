@@ -106,7 +106,7 @@ static ssize_t device_read(struct file* file,
     // Buffer too small for message
     if (length < prev_message_size) {
         printk(KERN_ERR "Buffer too small for the previous message. "
-                         "Message size: %d, buffer size: %d\n", channel_id, length);
+                         "Message size: %d, buffer size: %ld\n", channel_id, length);
         return -ENOSPC;
     }
 
