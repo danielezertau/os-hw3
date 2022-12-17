@@ -9,6 +9,7 @@
 int main(int argc, char *argv[]) {
     int expected_num_args = 4, channel_id, message_len, fd;
     char *message_slot_file_path, *message;
+    size_t bytes_written;
     if (argc != expected_num_args) {
         printf("Wrong number of arguments. Expected: %d, actual: %d", expected_num_args, argc);
         exit(EXIT_FAILURE);
@@ -28,7 +29,8 @@ int main(int argc, char *argv[]) {
         perror(NULL);
         exit(EXIT_FAILURE);
     }
-    if (write(fd, message, message_len) == -1) {
+    bytes_written = write(fd, message, message_len);
+    if (bytes_written == -1 || bytes_written != message_len) {
         perror(NULL);
         exit(EXIT_FAILURE);
     }

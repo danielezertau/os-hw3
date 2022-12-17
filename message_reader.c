@@ -8,7 +8,7 @@
 
 int main(int argc, char *argv[]) {
     int expected_num_args = 3, channel_id, fd;
-    ssize_t message_len;
+    size_t bytes_read, bytes_written;
     char* message_slot_file_path;
     char buff[MAX_MESSAGE_LEN];
 
@@ -30,8 +30,8 @@ int main(int argc, char *argv[]) {
         perror(NULL);
         exit(EXIT_FAILURE);
     }
-    message_len = read(fd, buff, MAX_MESSAGE_LEN);
-    if (message_len == -1) {
+    bytes_read = read(fd, buff, MAX_MESSAGE_LEN);
+    if (bytes_read == -1) {
         perror(NULL);
         exit(EXIT_FAILURE);
     }
@@ -39,7 +39,8 @@ int main(int argc, char *argv[]) {
         perror(NULL);
         exit(EXIT_FAILURE);
     }
-    if (write(STDOUT_FILENO, buff, message_len) == -1) {
+    bytes_written = write(STDOUT_FILENO, buff, bytes_read);
+    if (bytes_written == -1 || bytes_written != bytes_read) {
         perror(NULL);
         exit(EXIT_FAILURE);
     }
