@@ -98,6 +98,7 @@ static ssize_t device_read(struct file* file,
 
     // Write message to user buffer
     for( i = 0; i < length && i < curr->message_size && i < MAX_MESSAGE_LEN; ++i ) {
+        printk("In iteration %zu\n", i);
         if (put_user((curr->message)[i], &buffer[i]) != 0) {
             return -EFAULT;
         }
