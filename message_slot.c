@@ -16,14 +16,10 @@
 #include <linux/errno.h>
 #include <linux/stddef.h> /* for NULL */
 #include <linux/slab.h> /* for GFP_KERNEL */
+#include "message_slot.h"
 
 MODULE_LICENSE("GPL");
 
-//Our custom definitions of IOCTL operations
-#include "message_slot.h"
-
-// Message slots array
-static struct LinkedList* message_slots[MAX_MESSAGE_SLOTS];
 
 // Linked List implementation
 struct LinkedList {
@@ -32,6 +28,9 @@ struct LinkedList {
     int channel_id;
     struct LinkedList *next;
 };
+
+// Message slots array
+static struct LinkedList* message_slots[MAX_MESSAGE_SLOTS];
 
 int get_minor_number(struct file* file) {
     return iminor(file->f_inode);
