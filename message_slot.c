@@ -79,33 +79,41 @@ static ssize_t device_read(struct file* file,
     }
     channel_id = (unsigned long) file->private_data;
 
-    // Channel is empty
+    // File descriptor has no channels
     minor_number = get_minor_number(file);
     head = message_slots[minor_number];
     if (head == NULL) {
-        printk("Head is NULL\n");
+        printk(KERN_ERR, "Linked list head is NULL\n");
         return -EWOULDBLOCK;
     }
 
-    printk("Invoking device_read\n");
+    printk(KERN_INFO, "Invoking device_read\n");
+
     // Search for the message channel
     curr = head;
     while(curr ->next != NULL && curr->channel_id != channel_id) {
         curr = curr->next;
     }
-    // No channel for ID
-    if (curr == NULL || curr->channel_id != channel_id) {
-        printk("curr is NULL or has the wrong channel id\n");
+
+    // Channel ID not found
+    if (curr->channel_id != channel_id) {
+        printk(KERN_ERR, "Channel ID %d not found\n", channel_id);
         return -EWOULDBLOCK;
     }
+
+    prev_message_size = curr->message_size;
+
     // Buffer too small for message
-    if (length < curr->message_size) {
+    if (length < prev_message_size) {
+        printk(KERN_ERR, "Buffer too small for the previous message. "
+                         "Message size: %d, buffer size: %d\n", channel_id, length);
         return -ENOSPC;
     }
-    prev_message_size = curr->message_size;
+
     // Write message to user buffer
-    for( i = 0; i < curr->message_size && i < length && i < MAX_MESSAGE_LEN; ++i ) {
+    for( i = 0; i < prev_message_size; ++i ) {
         if (put_user((curr->message)[i], &buffer[i]) != 0) {
+            printk(KERN_ERR, "Failed to write message to the user buffer\n");
             return -EFAULT;
         }
     }
@@ -131,7 +139,7 @@ static ssize_t device_write(struct file* file,
                             loff_t* offset) {
     ssize_t i;
     int minor_number, channel_id;
-    struct LinkedList *head, *curr, *tmp;
+    struct LinkedList *head, *curr;
 
     // Invalid buffer
     if (access_ok(buffer, length) == 0) {
@@ -153,15 +161,17 @@ static ssize_t device_write(struct file* file,
     // Get file minor number
     minor_number = get_minor_number(file);
 
-    printk("Invoking device_write\n");
+    printk(KERN_INFO, "Invoking device_write\n");
 
     head = message_slots[minor_number];
     curr = head;
 
     if (head == NULL) {
         // Initialize linked list
+        printk(KERN_INFO, "Initializing new linked list for minor %d", minor_number);
         head = create_node(channel_id);
         if (head == NULL) {
+            printk(KERN_ERR, "Failed to create new linked list for minor %d", minor_number);
             return -ENOMEM;
         }
         message_slots[minor_number] = head;
@@ -172,19 +182,22 @@ static ssize_t device_write(struct file* file,
             curr = curr->next;
         }
         if (curr->channel_id != channel_id) {
-            // Create new node
-            tmp = create_node(channel_id);
+            // We are at the List's tail, create new node
+            printk(KERN_INFO, "Creating new node for channel %ld", channel_id);
+            curr -> next = create_node(channel_id);
             if (tmp == NULL) {
+                printk("Failed to create linked list node for channel %ld", channel_id);
                 return -ENOMEM;
             }
-            curr -> next = tmp;
+            // Move to the new node
             curr = curr -> next;
         }
     }
 
-    // Write message
-    for( i = 0; i < length && i < MAX_MESSAGE_LEN; ++i ) {
+    // Write the message to the kernel buffer
+    for( i = 0; i < length ; ++i ) {
         if (get_user((curr->message)[i], &buffer[i]) != 0) {
+            printk(KERN_ERR, "Failed to write message to the kernel buffer\n");
             return -EFAULT;
         }
     }
