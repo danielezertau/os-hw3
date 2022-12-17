@@ -68,6 +68,12 @@ static ssize_t device_read(struct file* file,
     ssize_t i;
     int minor_number, channel_id, prev_message_size;
     struct LinkedList *head, *curr;
+
+    // Invalid buffer
+    if (access_ok(buffer, length) == 0) {
+        return -EINVAL;
+    }
+
     // Channel ID not set
     if (file->private_data == NULL) {
         return -EINVAL;
@@ -125,6 +131,12 @@ static ssize_t device_write(struct file* file,
     ssize_t i;
     int minor_number, channel_id;
     struct LinkedList *head, *curr;
+
+    // Invalid buffer
+    if (access_ok(buffer, length) == 0) {
+        return -EINVAL;
+    }
+
     // Channel not set
     if (file->private_data == NULL) {
         return -EINVAL;
@@ -137,7 +149,7 @@ static ssize_t device_write(struct file* file,
         return -EMSGSIZE;
     }
 
-    // Write message to the kernel buffer
+    // Get file minor number
     minor_number = get_minor_number(file);
 
     printk("Invoking device_write\n");
