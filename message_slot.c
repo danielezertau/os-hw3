@@ -100,7 +100,7 @@ static ssize_t device_read(struct file* file,
     for( i = 0; i < curr->message_size; ++i ) {
         char c = (curr->message)[i];
         printk("In iteration %zu. Read char %c\n", i, c);
-        if (put_user(c, (&buffer)[i]) != 0) {
+        if (put_user(c, &buffer[i]) != 0) {
             return -EFAULT;
         }
     }
