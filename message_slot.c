@@ -185,7 +185,7 @@ static ssize_t device_write(struct file* file,
             // We are at the List's tail, create new node
             printk(KERN_INFO, "Creating new node for channel %ld", channel_id);
             curr -> next = create_node(channel_id);
-            if (tmp == NULL) {
+            if (curr -> next == NULL) {
                 printk("Failed to create linked list node for channel %ld", channel_id);
                 return -ENOMEM;
             }
