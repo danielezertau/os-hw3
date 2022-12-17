@@ -66,7 +66,7 @@ static ssize_t device_read(struct file* file,
                             size_t length,
                             loff_t* offset) {
     ssize_t i;
-    int minor_number, channel_id;
+    int minor_number, channel_id, prev_message_size;
     struct LinkedList *head, *curr;
     // Channel ID not set
     if (file->private_data == NULL) {
@@ -95,12 +95,10 @@ static ssize_t device_read(struct file* file,
     if (length < curr->message_size) {
         return -ENOSPC;
     }
-
+    prev_message_size = curr->message_size;
     // Write message to user buffer
-    for( i = 0; i < (curr->message_size); ++i ) {
-        char c = (curr->message)[i];
-        printk("In iteration %zu. Read char %c\n", i, c);
-        if (put_user(c, &buffer[i]) != 0) {
+    for( i = 0; i < curr->message_size && i < length && i < MAX_MESSAGE_LEN; ++i ) {
+        if (put_user((curr->message)[i], &buffer[i]) != 0) {
             return -EFAULT;
         }
     }
