@@ -97,9 +97,10 @@ static ssize_t device_read(struct file* file,
     }
 
     // Write message to user buffer
-    for( i = 0; i < length && i < curr->message_size && i < MAX_MESSAGE_LEN; ++i ) {
-        printk("In iteration %zu. Read char %c\n", i, (curr->message)[i]);
-        if (put_user((curr->message)[i], &buffer[i]) != 0) {
+    for( i = 0; i < curr->message_size; ++i ) {
+        char c = (curr->message)[i];
+        printk("In iteration %zu. Read char %c\n", i, c);
+        if (put_user(c, (&buffer)[i]) != 0) {
             return -EFAULT;
         }
     }
