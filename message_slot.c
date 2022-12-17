@@ -84,6 +84,7 @@ static ssize_t device_read(struct file* file,
     minor_number = get_minor_number(file);
     head = message_slots[minor_number];
     if (head == NULL) {
+        printk("Head is NULL\n");
         return -EWOULDBLOCK;
     }
 
@@ -95,6 +96,7 @@ static ssize_t device_read(struct file* file,
     }
     // No channel for ID
     if (curr == NULL || curr->channel_id != channel_id) {
+        printk("curr is NULL or has the wrong channel id\n");
         return -EWOULDBLOCK;
     }
     // Buffer too small for message
