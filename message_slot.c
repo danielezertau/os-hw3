@@ -83,11 +83,11 @@ static ssize_t device_read(struct file* file,
     minor_number = get_minor_number(file);
     head = message_slots[minor_number];
     if (head == NULL) {
-        printk(KERN_ERR, "Linked list head is NULL\n");
+        printk(KERN_ERR "Linked list head is NULL\n");
         return -EWOULDBLOCK;
     }
 
-    printk(KERN_INFO, "Invoking device_read\n");
+    printk(KERN_INFO "Invoking device_read\n");
 
     // Search for the message channel
     curr = head;
@@ -97,7 +97,7 @@ static ssize_t device_read(struct file* file,
 
     // Channel ID not found
     if (curr->channel_id != channel_id) {
-        printk(KERN_ERR, "Channel ID %d not found\n", channel_id);
+        printk(KERN_ERR "Channel ID %d not found\n", channel_id);
         return -EWOULDBLOCK;
     }
 
@@ -105,7 +105,7 @@ static ssize_t device_read(struct file* file,
 
     // Buffer too small for message
     if (length < prev_message_size) {
-        printk(KERN_ERR, "Buffer too small for the previous message. "
+        printk(KERN_ERR "Buffer too small for the previous message. "
                          "Message size: %d, buffer size: %d\n", channel_id, length);
         return -ENOSPC;
     }
@@ -113,11 +113,11 @@ static ssize_t device_read(struct file* file,
     // Write message to user buffer
     for( i = 0; i < prev_message_size; ++i ) {
         if (put_user((curr->message)[i], &buffer[i]) != 0) {
-            printk(KERN_ERR, "Failed to write message to the user buffer\n");
+            printk(KERN_ERR "Failed to write message to the user buffer\n");
             return -EFAULT;
         }
     }
-    printk("Successfully read %zu bytes\n", i);
+    printk(KERN_INFO "Successfully read %zu bytes\n", i);
     return i;
 }
 
@@ -162,17 +162,17 @@ static ssize_t device_write(struct file* file,
     // Get file minor number
     minor_number = get_minor_number(file);
 
-    printk(KERN_INFO, "Invoking device_write\n");
+    printk(KERN_INFO "Invoking device_write\n");
 
     head = message_slots[minor_number];
     curr = head;
 
     if (head == NULL) {
         // Initialize linked list
-        printk(KERN_INFO, "Initializing new linked list for minor %d", minor_number);
+        printk(KERN_INFO "Initializing new linked list for minor %d", minor_number);
         head = create_node(channel_id);
         if (head == NULL) {
-            printk(KERN_ERR, "Failed to create new linked list for minor %d", minor_number);
+            printk(KERN_ERR "Failed to create new linked list for minor %d", minor_number);
             return -ENOMEM;
         }
         message_slots[minor_number] = head;
@@ -184,10 +184,10 @@ static ssize_t device_write(struct file* file,
         }
         if (curr->channel_id != channel_id) {
             // We are at the List's tail, create new node
-            printk(KERN_INFO, "Creating new node for channel %ld", channel_id);
+            printk(KERN_INFO "Creating new node for channel %d", channel_id);
             curr -> next = create_node(channel_id);
             if (curr -> next == NULL) {
-                printk("Failed to create linked list node for channel %ld", channel_id);
+                printk(KERN_ERR "Failed to create linked list node for channel %d", channel_id);
                 return -ENOMEM;
             }
             // Move to the new node
@@ -196,22 +196,22 @@ static ssize_t device_write(struct file* file,
     }
 
     // Write the message to an intermediate kernel buffer
-    printk(KERN_INFO, "Writing message to a kernel intermediate buffer\n");
+    printk(KERN_INFO "Writing message to a kernel intermediate buffer\n");
     for( i = 0; i < length ; ++i ) {
         if (get_user(intermediate_buffer[i], &buffer[i]) != 0) {
-            printk(KERN_ERR, "Failed to write message to the kernel buffer\n");
+            printk(KERN_ERR "Failed to write message to the kernel buffer\n");
             return -EFAULT;
         }
     }
-    printk(KERN_INFO, "Successfully wrote message to the kernel intermediate buffer\n");
+    printk(KERN_INFO "Successfully wrote message to the kernel intermediate buffer\n");
 
-    printk(KERN_INFO, "Writing message to the kernel linked list\n");
+    printk(KERN_INFO "Writing message to the kernel linked list\n");
     // Userland to kernel space transfer successful, safely copy to the kernel buffer
     for(i = 0; i < length; ++i) {
         (curr->message)[i] = intermediate_buffer[i];
     }
     curr->message_size = i;
-    printk("Successfully wrote %zu bytes\n", i);
+    printk(KERN_INFO "Successfully wrote %zu bytes\n", i);
     // return the number of input characters used
     return i;
 }
@@ -225,9 +225,9 @@ static long device_ioctl( struct   file* file,
         return -EINVAL;
     }
 
-    printk("Setting channel ID to %ld\n", ioctl_param);
+    printk(KERN_INFO "Setting channel ID to %ld\n", ioctl_param);
     file->private_data = (void *) ioctl_param;
-    printk("Successfully set private data to %ld\n", ioctl_param);
+    printk(KERN_INFO "Successfully set private data to %ld\n", ioctl_param);
 
     return SUCCESS;
 }
