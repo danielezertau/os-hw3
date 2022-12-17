@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
-#include <errno.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -21,20 +20,20 @@ int main(int argc, char *argv[]) {
 
     fd = open(message_slot_file_path, O_RDWR);
     if (fd < 0) {
-        perror(strerror(errno));
+        perror(NULL);
         exit(EXIT_FAILURE);
     }
 
     if (ioctl(fd, MSG_SLOT_CHANNEL, channel_id) == -1) {
-        perror(strerror(errno));
+        perror(NULL);
         exit(EXIT_FAILURE);
     }
     if (write(fd, message, message_len) == -1) {
-        perror(strerror(errno));
+        perror(NULL);
         exit(EXIT_FAILURE);
     }
     if (close(fd) == -1) {
-        perror(strerror(errno));
+        perror(NULL);
         exit(EXIT_FAILURE);
     }
     return EXIT_SUCCESS;
