@@ -140,6 +140,7 @@ static ssize_t device_write(struct file* file,
     ssize_t i;
     int minor_number, channel_id;
     struct LinkedList *head, *curr;
+    char intermediate_buffer[MAX_MESSAGE_LEN];
 
     // Invalid buffer
     if (access_ok(buffer, length) == 0) {
@@ -194,12 +195,20 @@ static ssize_t device_write(struct file* file,
         }
     }
 
-    // Write the message to the kernel buffer
+    // Write the message to an intermediate kernel buffer
+    printk(KERN_INFO, "Writing message to a kernel intermediate buffer\n");
     for( i = 0; i < length ; ++i ) {
-        if (get_user((curr->message)[i], &buffer[i]) != 0) {
+        if (get_user(intermediate_buffer[i], &buffer[i]) != 0) {
             printk(KERN_ERR, "Failed to write message to the kernel buffer\n");
             return -EFAULT;
         }
+    }
+    printk(KERN_INFO, "Successfully wrote message to the kernel intermediate buffer\n");
+
+    printk(KERN_INFO, "Writing message to the kernel linked list\n");
+    // Userland to kernel space transfer successful, safely copy to the kernel buffer
+    for(i = 0; i < length; ++i) {
+        (curr->message)[i] = intermediate_buffer[i];
     }
     curr->message_size = i;
     printk("Successfully wrote %zu bytes\n", i);
